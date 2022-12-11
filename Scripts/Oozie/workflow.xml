@@ -1,0 +1,29 @@
+
+<workflow-app name="Runnig_Scripts" xmlns="uri:oozie:workflow:0.5">
+    <start to="shell-53eb"/>
+    <kill name="Kill">
+        <message>Action failed, error message[${wf:errorMessage(wf:lastErrorNode())}]</message>
+    </kill>
+    <action name="shell-53eb">
+        <shell xmlns="uri:oozie:shell-action:0.1">
+            <job-tracker>${jobTracker}</job-tracker>
+            <name-node>${nameNode}</name-node>
+            <exec>/user/cloudera/Load_data_to_HDFS.sh</exec>
+            <file>/user/cloudera/Load_data_to_HDFS.sh#Load_data_to_HDFS.sh</file>
+              <capture-output/>
+        </shell>
+        <ok to="hive2-d076"/>
+        <error to="Kill"/>
+    </action>
+    <action name="hive2-d076">
+        <hive2 xmlns="uri:oozie:hive2-action:0.1">
+            <job-tracker>${jobTracker}</job-tracker>
+            <name-node>${nameNode}</name-node>
+            <jdbc-url>jdbc:hive2://quickstart.cloudera:10000/default</jdbc-url>
+            <script>/user/cloudera/Create_Hive_Tables.hql</script>
+        </hive2>
+        <ok to="End"/>
+        <error to="Kill"/>
+    </action>
+    <end name="End"/>
+</workflow-app>
